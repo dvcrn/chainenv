@@ -1,4 +1,3 @@
-
 #!/usr/bin/env python3
 import argparse
 import subprocess
@@ -14,6 +13,27 @@ def get_password(account):
     except Exception as e:
         print(f"Error retrieving password: {e}", file=sys.stderr)
         return None
+
+def get_multiple_passwords(accounts):
+    results = {}
+    for account in accounts:
+        password = get_password(account)
+        if password:
+            results[account] = password
+    return results
+
+def format_shell_exports(accounts_passwords, shell):
+    if not accounts_passwords:
+        return ""
+    
+    if shell == "fish":
+        return "\n".join([f"set -x {account} {password}" for account, password in accounts_passwords.items()])
+    elif shell == "bash" or shell == "sh":
+        return "\n".join([f"export {account}='{password}'" for account, password in accounts_passwords.items()])
+    elif shell == "zsh":
+        return "\n".join([f"export {account}='{password}'" for account, password in accounts_passwords.items()])
+    else:
+        return "\n".join([f"{account}={password}" for account, password in accounts_passwords.items()])
 
 def set_password(account, password, update=False):
     try:
@@ -36,6 +56,13 @@ def main():
     get_parser = subparsers.add_parser('get', help='Get password from keychain')
     get_parser.add_argument('account', help='Account name to retrieve')
     
+    # Get-env command
+    getenv_parser = subparsers.add_parser('get-env', help='Get multiple passwords as shell exports')
+    getenv_parser.add_argument('accounts', type=lambda x: x.split(','), help='Comma-separated list of account names to retrieve')    
+    getenv_parser.add_argument('--fish', action='store_true', help='Output fish shell format')
+    getenv_parser.add_argument('--bash', action='store_true', help='Output bash shell format')
+    getenv_parser.add_argument('--zsh', action='store_true', help='Output zsh shell format')
+    
     # Set command
     set_parser = subparsers.add_parser('set', help='Set password in keychain')
     set_parser.add_argument('account', help='Account name to set')
@@ -54,6 +81,22 @@ def main():
             print(password)
         else:
             print("Password not found", file=sys.stderr)
+            sys.exit(1)
+    elif args.command == 'get-env':
+        shell = "plain"
+        if args.fish:
+            shell = "fish"
+        elif args.bash:
+            shell = "bash"
+        elif args.zsh:
+            shell = "zsh"
+        
+        passwords = get_multiple_passwords(args.accounts)
+        output = format_shell_exports(passwords, shell)
+        if output:
+            print(output)
+        else:
+            print("No passwords found", file=sys.stderr)
             sys.exit(1)
     elif args.command == 'set':
         if set_password(args.account, args.password):
