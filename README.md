@@ -56,22 +56,22 @@ chainenv get-env <account1,account2,...> [--fish|--bash|--zsh]
 ## Examples
 
 
-# Get a password
+### Get a password
 ```
 chainenv get myaccount
 ```
 
-# Set a new password
+### Set a new password
 ```
 chainenv set myaccount mypassword123
 ```
 
-# Update an existing password
+### Update an existing password
 ```
 chainenv update myaccount newpassword123
 ```
 
-# Get multiple passwords as environment variables
+### Get multiple passwords as environment variables
 ```
 chainenv get-env GITHUB_USERNAME,GITHUB_PASSWORD,AWS_KEY
 ```
@@ -82,13 +82,13 @@ chainenv get-env GITHUB_USERNAME,GITHUB_PASSWORD,AWS_KEY
 ### Bash/Zsh
 
 
-# Individual password retrieval
+#### Individual password retrieval
 ```
 export GITHUB_USERNAME=$(chainenv get GITHUB_USERNAME)
 export GITHUB_PASSWORD=$(chainenv get GITHUB_PASSWORD)
 ```
 
-# Multiple passwords at once
+#### Multiple passwords at once
 ```
 eval $(chainenv get-env GITHUB_USERNAME,GITHUB_PASSWORD --bash)
 ```
@@ -97,13 +97,13 @@ eval $(chainenv get-env GITHUB_USERNAME,GITHUB_PASSWORD --bash)
 ### Fish
 
 
-# Individual password retrieval
+#### Individual password retrieval
 ```
 set -gx GITHUB_USERNAME (chainenv get GITHUB_USERNAME)
 set -gx GITHUB_PASSWORD (chainenv get GITHUB_PASSWORD)
 ```
 
-# Multiple passwords at once
+#### Multiple passwords at once
 ```
 eval (chainenv get-env GITHUB_USERNAME,GITHUB_PASSWORD --fish)
 ```
@@ -111,13 +111,13 @@ eval (chainenv get-env GITHUB_USERNAME,GITHUB_PASSWORD --fish)
 
 ### Direnv (.envrc)
 
-# Individual password retrieval
+#### Individual password retrieval
 ```
 export GITHUB_USERNAME="$(chainenv get GITHUB_USERNAME)"
 export GITHUB_PASSWORD="$(chainenv get GITHUB_PASSWORD)"
 ```
 
-# Multiple passwords at once
+#### Multiple passwords at once
 
 ```
 eval "$(chainenv get-env GITHUB_USERNAME,GITHUB_PASSWORD,AWS_KEY --bash)"
