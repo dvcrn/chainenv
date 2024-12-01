@@ -27,13 +27,13 @@ def format_shell_exports(accounts_passwords, shell):
         return ""
     
     if shell == "fish":
-        return "\n".join([f"set -x {account} {password}" for account, password in accounts_passwords.items()])
+        return "\n".join([f"set -x {account} '{password}'" for account, password in accounts_passwords.items()])
     elif shell == "bash" or shell == "sh":
         return "\n".join([f"export {account}='{password}'" for account, password in accounts_passwords.items()])
     elif shell == "zsh":
         return "\n".join([f"export {account}='{password}'" for account, password in accounts_passwords.items()])
     else:
-        return "\n".join([f"{account}={password}" for account, password in accounts_passwords.items()])
+        return "\n".join([f"{account}='{password}'" for account, password in accounts_passwords.items()])
 
 def set_password(account, password, update=False):
     try:
