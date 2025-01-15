@@ -1,60 +1,50 @@
-name: Build Release Assets
+name: Release
 
 on:
   push:
     tags:
-      - "*"
+      - "v*"
+  workflow_dispatch:
 
 jobs:
-  build-bottles:
+  goreleaser:
     runs-on: macos-latest
-    strategy:
-      matrix:
-        os: [macos-14, macos-15]
-
     steps:
       - name: Checkout
         uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
 
-      - name: Set up Homebrew
-        uses: Homebrew/actions/setup-homebrew@master
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: '>=1.20.0'
 
-      - name: Build bottle
+      - name: Run GoReleaser
+        uses: goreleaser/goreleaser-action@v4
+        with:
+          version: latest
+          args: release --clean
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Create Homebrew Bottle
         run: |
-          brew tap dvcrn/homebrew-formulas
-          brew install --build-bottle --verbose chainenv
+          # Install the released binary
+          BINARY_PATH=$(find dist -name 'chainenv_darwin_amd64_v1/chainenv' -o -name 'chainenv_darwin_arm64_v1/chainenv' | head -n 1)
+          sudo cp "$BINARY_PATH" /usr/local/bin/chainenv
+          sudo chmod +x /usr/local/bin/chainenv
+
+          # Create bottle
+          brew install --build-bottle chainenv
           brew bottle chainenv
 
-      - name: Upload bottle
+          # Upload the bottle as an artifact
+          mkdir -p bottles
+          mv chainenv--*.tar.gz bottles/
+
+      - name: Upload Bottle
         uses: actions/upload-artifact@v3
         with:
-          name: bottles
-          path: ./*.bottle*.tar.gz
-
-  build-binaries:
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        goos: [darwin]
-        goarch: [amd64, arm64]
-
-    steps:
-      - uses: actions/checkout@v3
-
-      - uses: actions/setup-go@v4
-        with:
-          go-version: "1.21"
-
-      - name: Build binary
-        env:
-          GOOS: ${{ matrix.goos }}
-          GOARCH: ${{ matrix.goarch }}
-        run: |
-          OUTPUT="chainenv-${{ matrix.goos }}-${{ matrix.goarch }}"
-          go build -ldflags="-s -w" -o "${OUTPUT}" main.go
-
-      - name: Upload binary
-        uses: actions/upload-artifact@v3
-        with:
-          name: binaries
-          path: chainenv-*
+          name: homebrew-bottle
+          path: bottles/*.tar.gz
