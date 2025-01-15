@@ -17,6 +17,11 @@ builds:
     ldflags:
       - -s -w -X main.version={{.Version}}
 
+release:
+  extra_files:
+    - glob: "./bottles/*.tar.gz"
+  replace_existing_artifacts: true
+
 archives:
   - format: tar.gz
     name_template: >-
@@ -40,3 +45,9 @@ changelog:
       - "^chore:"
       - Merge pull request
       - Merge branch
+
+brews:
+- name: chainenv
+  repository:
+    owner: dvcrn
+    name: homebrew-formulas
