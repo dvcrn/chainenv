@@ -1,0 +1,54 @@
+package cmd
+
+import (
+	"fmt"
+	"os"
+
+	"github.com/dvcrn/chainenv/backend"
+	"github.com/dvcrn/chainenv/logger"
+	"github.com/spf13/cobra"
+)
+
+var (
+	backendType string
+	opVault     string
+	debug       bool
+	log         *logger.Logger
+)
+
+var rootCmd = &cobra.Command{
+	Use:   "chainenv",
+	Short: "chainenv - A tool for managing environment variables securely",
+	Long:  `chainenv allows you to securely store and retrieve environment variables using different secure backends like macOS Keychain or 1Password.`,
+	PersistentPreRun: func(cmd *cobra.Command, args []string) {
+		log = logger.NewLogger(debug)
+		log.Debug("Using backend: %s", backendType)
+	},
+}
+
+// Execute adds all child commands to the root command and sets flags appropriately.
+func Execute() {
+	if err := rootCmd.Execute(); err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
+	}
+}
+
+func getBackend() (backend.Backend, error) {
+	opts := backend.WithLogger(log)
+
+	switch backendType {
+	case "keychain":
+		return backend.NewKeychainBackend(), nil
+	case "1password":
+		return backend.NewOnePasswordBackend(opVault, opts), nil
+	default:
+		return nil, fmt.Errorf("unknown backend: %s", backendType)
+	}
+}
+
+func init() {
+	rootCmd.PersistentFlags().StringVar(&backendType, "backend", "keychain", "Backend to use (keychain or 1password)")
+	rootCmd.PersistentFlags().StringVar(&opVault, "vault", "chainenv", "1Password vault to use")
+	rootCmd.PersistentFlags().BoolVar(&debug, "debug", false, "Enable debug logging")
+}

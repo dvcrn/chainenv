@@ -2,6 +2,7 @@ package backend
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/dvcrn/chainenv/logger"
 	"github.com/dvcrn/go-1password-cli/op"
@@ -58,6 +59,7 @@ func (o *OnePasswordBackend) ensureVaultExists() error {
 		o.logger.Info("Created new 1Password vault: ID: %s, Name: %s\n", vault.ID, vault.Name)
 	}
 
+	o.vault = vault
 	return nil
 }
 
@@ -68,6 +70,10 @@ func (o *OnePasswordBackend) GetPassword(account string) (string, error) {
 
 	value, err := o.client.ReadItemField(o.vault.ID, account, "password")
 	if err != nil {
+		if strings.Contains(err.Error(), "isn't an item") {
+			return "", fmt.Errorf("the item '%s' does not exist in the vault", account)
+		}
+
 		return "", fmt.Errorf("error retrieving password from 1Password: %v", err)
 	}
 
@@ -101,7 +107,7 @@ func (o *OnePasswordBackend) SetPassword(account, password string, update bool) 
 	}
 
 	if vaultItem != nil {
-		return fmt.Errorf("item already exists")
+		return fmt.Errorf("item already exists. use 'update' to update.")
 	}
 
 	item, err := o.client.CreateItem(o.vault.ID, "password", account,
