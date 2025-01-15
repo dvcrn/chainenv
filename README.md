@@ -4,6 +4,13 @@ A simple macOS Keychain CLI wrapper for getting/setting secrets from keychain or
 
 ## Installation
 
+brew
+
+```
+brew install dvcrn/formulas/chainenv
+```
+
+... or with Go: 
 
 ```
 go install github.com/dvcrn/chainenv@latest
