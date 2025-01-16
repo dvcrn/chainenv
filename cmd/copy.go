@@ -9,8 +9,9 @@ import (
 )
 
 var (
-	source string
-	target string
+	source    string
+	target    string
+	overwrite bool
 )
 
 var copyCmd = &cobra.Command{
@@ -41,18 +42,19 @@ var copyCmd = &cobra.Command{
 			}
 		}
 
-		for _, key := range keys {
-			password, err := sourceBackend.GetPassword(key)
-			if err != nil {
-				log.Err("Failed to get password for %s: %v", key, err)
-				continue
-			}
+		passwords := getMultiplePasswords(keys, sourceBackend)
 
+		for key, password := range passwords {
 			if err := targetBackend.SetPassword(key, password, false); err != nil {
-				if err := targetBackend.SetPassword(key, password, true); err != nil {
-					log.Err("Failed to copy password for %s: %v", key, err)
-					continue
+				if overwrite {
+					if err := targetBackend.SetPassword(key, password, true); err != nil {
+						log.Err("Failed to overwrite password for %s: %v", key, err)
+						continue
+					}
+				} else {
+					log.Err("Failed to copy password for %s: %v. Use --overwrite to overwrite existing items.", key, err)
 				}
+				continue
 			}
 
 			fmt.Printf("Copied password for %s from %s to %s\n", key, source, target)
@@ -63,6 +65,7 @@ var copyCmd = &cobra.Command{
 func init() {
 	copyCmd.Flags().StringVar(&source, "from", "", "Source backend (keychain or 1password)")
 	copyCmd.Flags().StringVar(&target, "to", "", "Target backend (keychain or 1password)")
+	copyCmd.Flags().BoolVar(&overwrite, "overwrite", false, "Overwrite existing passwords in target backend")
 	copyCmd.MarkFlagRequired("from")
 	copyCmd.MarkFlagRequired("to")
 	rootCmd.AddCommand(copyCmd)
