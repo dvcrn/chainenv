@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"strings"
+	"sync"
 
 	"github.com/dvcrn/chainenv/backend"
 	"github.com/spf13/cobra"
@@ -39,11 +40,35 @@ func formatShellExports(accountsPasswords map[string]string, shell string) strin
 
 func getMultiplePasswords(accounts []string, b backend.Backend) map[string]string {
 	results := make(map[string]string)
+	resultsChan := make(chan struct {
+		account  string
+		password string
+	}, len(accounts))
+
+	var wg sync.WaitGroup
 	for _, account := range accounts {
-		if password, err := b.GetPassword(account); err == nil {
-			results[account] = password
-		}
+
+		wg.Add(1)
+		go func(acc string) {
+			defer wg.Done()
+			if password, err := b.GetPassword(acc); err == nil {
+				resultsChan <- struct {
+					account  string
+					password string
+				}{acc, password}
+			}
+		}(account)
 	}
+
+	go func() {
+		wg.Wait()
+		close(resultsChan)
+	}()
+
+	for result := range resultsChan {
+		results[result.account] = result.password
+	}
+
 	return results
 }
 
