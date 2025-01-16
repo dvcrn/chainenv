@@ -45,9 +45,3 @@ changelog:
       - "^chore:"
       - Merge pull request
       - Merge branch
-
-brews:
-- name: chainenv
-  repository:
-    owner: dvcrn
-    name: homebrew-formulas
