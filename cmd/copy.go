@@ -54,7 +54,6 @@ var copyCmd = &cobra.Command{
 				} else {
 					log.Err("Failed to copy password for %s: %v. Use --overwrite to overwrite existing items.", key, err)
 				}
-				continue
 			}
 
 			fmt.Printf("Copied password for %s from %s to %s\n", key, source, target)
