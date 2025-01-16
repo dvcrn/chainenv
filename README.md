@@ -31,6 +31,7 @@ Usage:
 
 Available Commands:
   completion  Generate the autocompletion script for the specified shell
+  copy        Copy passwords between backends
   get         Get a password for an account
   get-env     Get passwords as environment variables
   help        Help about any command
@@ -42,11 +43,35 @@ Flags:
       --debug            Enable debug logging
   -h, --help             help for chainenv
       --vault string     1Password vault to use (default "chainenv")
-
-Use "chainenv [command] --help" for more information about a command.
 ```
 
-Caveats: 1Password mode is quite slow.
+
+### Note on 1Password
+
+Caveats: 1Password mode is very very slow. This is sped-up somewhat by using goroutines to parallelize the requests, but it's still slow.
+
+My recommendation: Use `chainenv cp --from 1password --to keychain` to copy passwords from 1Password to the keychain, then use keychain for fast access.
+
+```
+❯ time ./chainenv get-env TEST,TEST2,Test3
+TEST='123'
+TEST2='123'
+
+________________________________________________________
+Executed in   36.67 millis    fish           external
+   usr time   19.28 millis   30.00 micros   19.25 millis
+   sys time   19.04 millis  502.00 micros   18.54 millis
+
+
+❯ time ./chainenv get-env TEST,TEST2,Test3 --backend 1password
+TEST='123'
+TEST2='123'
+
+________________________________________________________
+Executed in    3.42 secs      fish           external
+   usr time  256.23 millis   48.00 micros  256.18 millis
+   sys time  129.46 millis  587.00 micros  128.87 millis
+```
 
 
 ### Commands
@@ -103,7 +128,11 @@ export account1='foo'
 export account2='bar'
 ```
 
+### Copy Passwords
 
+```
+chainenv cp --from <backend> --to <backend> ITEM1,ITEM2
+```
 
 ## Examples
 
