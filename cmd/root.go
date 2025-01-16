@@ -34,7 +34,7 @@ func Execute() {
 	}
 }
 
-func getBackend() (backend.Backend, error) {
+func getBackendWithType(backendType string) (backend.Backend, error) {
 	opts := backend.WithLogger(log)
 
 	switch backendType {

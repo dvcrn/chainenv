@@ -68,7 +68,7 @@ Multiple accounts should be provided as a comma-separated list, e.g.:
 
 		log.Debug("Getting passwords for accounts: %s, shell=%s", strings.Join(accounts, ", "), shellType)
 
-		b, err := getBackend()
+		b, err := getBackendWithType(backendType)
 		if err != nil {
 			log.Err("Error initializing backend: %v", err)
 			os.Exit(1)

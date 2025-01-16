@@ -17,7 +17,7 @@ var setCmd = &cobra.Command{
 		password := args[1]
 		log.Debug("Setting password for account: %s", account)
 
-		b, err := getBackend()
+		b, err := getBackendWithType(backendType)
 		if err != nil {
 			log.Err("Error initializing backend: %v", err)
 			os.Exit(1)
@@ -42,7 +42,7 @@ var updateCmd = &cobra.Command{
 		password := args[1]
 		log.Debug("Updating password for account: %s", account)
 
-		b, err := getBackend()
+		b, err := getBackendWithType(backendType)
 		if err != nil {
 			log.Err("Error initializing backend: %v", err)
 			os.Exit(1)

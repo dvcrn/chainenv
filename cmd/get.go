@@ -16,7 +16,7 @@ var getCmd = &cobra.Command{
 		account := args[0]
 		log.Debug("Getting password for account: %s", account)
 
-		b, err := getBackend()
+		b, err := getBackendWithType(backendType)
 		if err != nil {
 			log.Err("Error initializing backend: %v", err)
 			os.Exit(1)
