@@ -35,6 +35,7 @@ Available Commands:
   get         Get a password for an account
   get-env     Get passwords as environment variables
   help        Help about any command
+  ls          List all stored accounts
   set         Set a password for an account
   update      Update a password for an existing account
 
@@ -75,6 +76,15 @@ Executed in    3.42 secs      fish           external
 
 
 ### Commands
+
+#### List Accounts
+Lists all accounts that have passwords stored in the configured backend.
+
+```
+chainenv ls
+chainenv list
+chainenv ls --backend 1password
+```
 
 #### Get Password
 Retrieves a password from the keychain for a specified account.
@@ -136,6 +146,10 @@ chainenv cp --from <backend> --to <backend> ITEM1,ITEM2
 
 ## Examples
 
+### List all stored accounts
+```
+chainenv ls
+```
 
 ### Get a password
 ```

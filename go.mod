@@ -3,7 +3,7 @@ module github.com/dvcrn/chainenv
 go 1.21
 
 require (
-	github.com/dvcrn/go-1password-cli v0.0.0-20250115095305-eaf63fda9984
+	github.com/dvcrn/go-1password-cli v0.0.0-20250530032316-381fc03bd9e8
 	github.com/spf13/cobra v1.8.1
 )
 

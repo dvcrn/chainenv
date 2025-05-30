@@ -125,3 +125,21 @@ func (o *OnePasswordBackend) SetPassword(account, password string, update bool) 
 
 	return nil
 }
+
+func (o *OnePasswordBackend) List() ([]string, error) {
+	if err := o.ensureVaultExists(); err != nil {
+		return nil, fmt.Errorf("error ensuring vault exists: %v", err)
+	}
+
+	items, err := o.client.ItemsByVault(o.vault.ID, op.WithTags([]string{"chainenv"}))
+	if err != nil {
+		return nil, fmt.Errorf("error listing items in 1Password: %v", err)
+	}
+
+	var accounts []string
+	for _, item := range items {
+		accounts = append(accounts, item.Title)
+	}
+
+	return accounts, nil
+}

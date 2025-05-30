@@ -3,6 +3,7 @@ package backend
 import (
 	"fmt"
 	"os/exec"
+	"regexp"
 	"strings"
 )
 
@@ -32,4 +33,34 @@ func (k *KeychainBackend) SetPassword(account, password string, update bool) err
 		return fmt.Errorf("error setting password: %v: %s", err, output)
 	}
 	return nil
+}
+
+func (k *KeychainBackend) List() ([]string, error) {
+	// Use security dump-keychain to get all keychain items
+	cmd := exec.Command("security", "dump-keychain")
+	output, err := cmd.CombinedOutput()
+	if err != nil {
+		return nil, fmt.Errorf("error listing keychain items: %v", err)
+	}
+
+	// Parse the output to find chainenv items
+	var accounts []string
+	seen := make(map[string]bool)
+	
+	// Look for service attributes that match "chainenv-*"
+	lines := strings.Split(string(output), "\n")
+	serviceRegex := regexp.MustCompile(`"svce"<blob>="chainenv-(.+)"`)
+	
+	for _, line := range lines {
+		matches := serviceRegex.FindStringSubmatch(line)
+		if len(matches) > 1 {
+			account := matches[1]
+			if !seen[account] {
+				accounts = append(accounts, account)
+				seen[account] = true
+			}
+		}
+	}
+	
+	return accounts, nil
 }
