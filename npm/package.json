@@ -2,6 +2,9 @@
   "name": "@dvcrn/chainenv",
   "version": "1.3.0",
   "description": "Release package for chainenv",
+  "publishConfig": {
+    "access": "public"
+  },
   "bin": {
     "chainenv": "index.js"
   },

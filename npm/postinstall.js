@@ -33,7 +33,7 @@ function sha256(buf) { const h = crypto.createHash('sha256'); h.update(buf); ret
     }
 
     const pkg = JSON.parse(fs.readFileSync(path.join(__dirname, 'package.json'), 'utf8'));
-    const version = (process.env.CHAINENV_VERSION || pkg.version || '').replace(/^v/, '');
+    const version = process.env.CHAINENV_VERSION || pkg.version || '';
     if (!version) { console.error('postinstall: could not determine version'); process.exit(1); }
 
     const arch = process.arch === 'x64' ? 'amd64' : (process.arch === 'arm64' ? 'arm64' : process.arch);
@@ -42,7 +42,7 @@ function sha256(buf) { const h = crypto.createHash('sha256'); h.update(buf); ret
     }
 
     const assetName = `chainenv_${version}_${process.platform}_${arch}.tar.gz`;
-    const base = process.env.CHAINENV_BASE_URL || `https://github.com/${OWNER}/${REPO}/releases/download/v${version}`;
+    const base = process.env.CHAINENV_BASE_URL || `https://github.com/${OWNER}/${REPO}/releases/download/${version}`;
     const url = `${base}/${assetName}`;
     const checksumsUrl = `${base}/checksums.txt`;
     const headers = { 'User-Agent': `${REPO}-postinstall` };

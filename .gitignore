@@ -1,2 +1,4 @@
 bottles/
-dist/
+dist/*.local.json
+npm/chainenv
+.claude/settings.local.json
