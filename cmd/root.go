@@ -35,20 +35,20 @@ func Execute() {
 }
 
 func getBackendWithType(backendType string) (backend.Backend, error) {
-    opts := backend.WithLogger(log)
+	opts := backend.WithLogger(log)
 
-    switch backendType {
-    case "keychain":
-        b, err := backend.NewKeychainBackend()
-        if err != nil {
-            return nil, fmt.Errorf("keychain backend unavailable: %w", err)
-        }
-        return b, nil
-    case "1password":
-        return backend.NewOnePasswordBackend(opVault, opts), nil
-    default:
-        return nil, fmt.Errorf("unknown backend: %s", backendType)
-    }
+	switch backendType {
+	case "keychain":
+		b, err := backend.NewKeychainBackend()
+		if err != nil {
+			return nil, fmt.Errorf("keychain backend unavailable: %w", err)
+		}
+		return b, nil
+	case "1password":
+		return backend.NewOnePasswordBackend(opVault, opts), nil
+	default:
+		return nil, fmt.Errorf("unknown backend: %s", backendType)
+	}
 }
 
 func init() {
