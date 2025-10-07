@@ -5,6 +5,7 @@ package backend
 import (
 	"errors"
 	"fmt"
+	"sync"
 
 	"github.com/99designs/keyring"
 )
@@ -65,4 +66,37 @@ func (k *KeychainBackend) List() ([]string, error) {
 		return nil, fmt.Errorf("error listing keyring items: %w", err)
 	}
 	return keys, nil
+}
+
+func (k *KeychainBackend) GetMultiplePasswords(accounts []string) (map[string]string, error) {
+	results := make(map[string]string)
+	resultsChan := make(chan struct {
+		account  string
+		password string
+	}, len(accounts))
+
+	var wg sync.WaitGroup
+	for _, account := range accounts {
+		wg.Add(1)
+		go func(acc string) {
+			defer wg.Done()
+			if password, err := k.GetPassword(acc); err == nil {
+				resultsChan <- struct {
+					account  string
+					password string
+				}{acc, password}
+			}
+		}(account)
+	}
+
+	go func() {
+		wg.Wait()
+		close(resultsChan)
+	}()
+
+	for result := range resultsChan {
+		results[result.account] = result.password
+	}
+
+	return results, nil
 }

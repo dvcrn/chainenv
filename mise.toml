@@ -6,7 +6,7 @@ run = "CGO_ENABLED=1 go build -trimpath -buildvcs=false -ldflags='-s -w -buildid
 description = "Build the chainenv binary"
 
 [tasks.fmt]
-run = "go run golang.org/x/tools/cmd/goimports@latest -w . && go run mvdan.cc/gofumpt@latest -w ."
+run = "go tool goimports -w . && go tool gofumpt -w ."
 description = "Format code with goimports and gofumpt"
 
 [tasks.release_gh]

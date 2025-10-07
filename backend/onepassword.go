@@ -2,6 +2,8 @@ package backend
 
 import (
 	"fmt"
+	"maps"
+	"slices"
 	"strings"
 
 	"github.com/dvcrn/chainenv/logger"
@@ -50,7 +52,6 @@ func (o *OnePasswordBackend) ensureVaultExists() error {
 			op.WithVaultDescription("Created by chainenv"),
 			op.WithVaultIcon("treasure-chest"),
 		)
-
 		if err != nil {
 			o.logger.Err("Error creating new 1Password vault: %s", err.Error())
 			return err
@@ -142,4 +143,29 @@ func (o *OnePasswordBackend) List() ([]string, error) {
 	}
 
 	return accounts, nil
+}
+
+func (o *OnePasswordBackend) GetMultiplePasswords(accounts []string) (map[string]string, error) {
+	if err := o.ensureVaultExists(); err != nil {
+		return nil, fmt.Errorf("error ensuring vault exists: %v", err)
+	}
+
+	refs := map[string]string{}
+	for _, acc := range accounts {
+		refs[op.ItemFieldRef(o.vault.ID, acc, "password")] = acc
+	}
+
+	vals := slices.Collect(maps.Keys(refs))
+	items, err := o.client.ReadMulti(vals)
+	if err != nil {
+		return nil, fmt.Errorf("err reading item refs: %v", err)
+	}
+
+	// parse the refs back to their value
+	results := make(map[string]string)
+	for itemRef, itemVal := range items {
+		results[refs[itemRef]] = itemVal
+	}
+
+	return results, nil
 }

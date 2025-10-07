@@ -8,6 +8,7 @@ import (
 	"os/exec"
 	"regexp"
 	"strings"
+	"sync"
 )
 
 type KeychainBackend struct{}
@@ -73,4 +74,37 @@ func (k *KeychainBackend) List() ([]string, error) {
 	}
 
 	return accounts, nil
+}
+
+func (k *KeychainBackend) GetMultiplePasswords(accounts []string) (map[string]string, error) {
+	results := make(map[string]string)
+	resultsChan := make(chan struct {
+		account  string
+		password string
+	}, len(accounts))
+
+	var wg sync.WaitGroup
+	for _, account := range accounts {
+		wg.Add(1)
+		go func(acc string) {
+			defer wg.Done()
+			if password, err := k.GetPassword(acc); err == nil {
+				resultsChan <- struct {
+					account  string
+					password string
+				}{acc, password}
+			}
+		}(account)
+	}
+
+	go func() {
+		wg.Wait()
+		close(resultsChan)
+	}()
+
+	for result := range resultsChan {
+		results[result.account] = result.password
+	}
+
+	return results, nil
 }

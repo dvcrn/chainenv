@@ -4,9 +4,7 @@ import (
 	"fmt"
 	"os"
 	"strings"
-	"sync"
 
-	"github.com/dvcrn/chainenv/backend"
 	"github.com/spf13/cobra"
 )
 
@@ -38,40 +36,6 @@ func formatShellExports(accountsPasswords map[string]string, shell string) strin
 	return strings.Join(exports, "\n")
 }
 
-func getMultiplePasswords(accounts []string, b backend.Backend) map[string]string {
-	results := make(map[string]string)
-	resultsChan := make(chan struct {
-		account  string
-		password string
-	}, len(accounts))
-
-	var wg sync.WaitGroup
-	for _, account := range accounts {
-
-		wg.Add(1)
-		go func(acc string) {
-			defer wg.Done()
-			if password, err := b.GetPassword(acc); err == nil {
-				resultsChan <- struct {
-					account  string
-					password string
-				}{acc, password}
-			}
-		}(account)
-	}
-
-	go func() {
-		wg.Wait()
-		close(resultsChan)
-	}()
-
-	for result := range resultsChan {
-		results[result.account] = result.password
-	}
-
-	return results
-}
-
 var getEnvCmd = &cobra.Command{
 	Use:   "get-env [account1,account2,...]",
 	Short: "Get passwords as environment variables",
@@ -99,10 +63,11 @@ Multiple accounts should be provided as a comma-separated list, e.g.:
 			os.Exit(1)
 		}
 
-		passwords := getMultiplePasswords(accounts, b)
+		passwords, err := b.GetMultiplePasswords(accounts)
 		output := formatShellExports(passwords, shellType)
 		if output == "" {
 			fmt.Fprintln(os.Stderr, "No passwords found")
+			fmt.Fprintln(os.Stderr, err.Error())
 			os.Exit(1)
 		}
 		fmt.Println(output)

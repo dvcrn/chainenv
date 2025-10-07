@@ -9,6 +9,7 @@ type Backend interface {
 	GetPassword(account string) (string, error)
 	SetPassword(account, password string, update bool) error
 	List() ([]string, error)
+	GetMultiplePasswords(accounts []string) (map[string]string, error)
 }
 
 // BackendOpts contains options for configuring a backend

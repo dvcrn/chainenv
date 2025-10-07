@@ -42,7 +42,7 @@ var copyCmd = &cobra.Command{
 			}
 		}
 
-		passwords := getMultiplePasswords(keys, sourceBackend)
+		passwords, _ := sourceBackend.GetMultiplePasswords(keys)
 
 		for key, password := range passwords {
 			if err := targetBackend.SetPassword(key, password, false); err != nil {
