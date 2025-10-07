@@ -14,12 +14,14 @@ var (
 	opVault     string
 	debug       bool
 	log         *logger.Logger
+	version     = "dev"
 )
 
 var rootCmd = &cobra.Command{
-	Use:   "chainenv",
-	Short: "chainenv - A tool for managing environment variables securely",
-	Long:  `chainenv allows you to securely store and retrieve environment variables using different secure backends like macOS Keychain or 1Password.`,
+	Use:     "chainenv",
+	Short:   "chainenv - A tool for managing environment variables securely",
+	Long:    `chainenv allows you to securely store and retrieve environment variables using different secure backends like macOS Keychain or 1Password.`,
+	Version: version,
 	PersistentPreRun: func(cmd *cobra.Command, args []string) {
 		log = logger.NewLogger(debug)
 		log.Debug("Using backend: %s", backendType)

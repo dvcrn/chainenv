@@ -1,0 +1,12 @@
+chainenv
+chainenv.exe
+*.bak
+*.old
+*.log
+*.tar.gz
+node_modules
+.DS_Store
+dist
+release
+bin
+bottles

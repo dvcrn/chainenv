@@ -1,0 +1,19 @@
+{
+  "name": "@dvcrn/chainenv",
+  "version": "1.2.0",
+  "description": "Release package for chainenv",
+  "bin": {
+    "chainenv": "index.js"
+  },
+  "scripts": {
+    "postinstall": "node postinstall.js"
+  },
+  "os": [
+    "darwin",
+    "linux"
+  ],
+  "cpu": [
+    "x64",
+    "arm64"
+  ]
+}

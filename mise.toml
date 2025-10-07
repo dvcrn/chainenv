@@ -1,0 +1,18 @@
+[tools]
+go = "1.25.1"
+
+[tasks.build]
+run = "CGO_ENABLED=1 go build -trimpath -buildvcs=false -ldflags='-s -w -buildid=' -o ./bin/chainenv ."
+description = "Build the chainenv binary"
+
+[tasks.fmt]
+run = "go run golang.org/x/tools/cmd/goimports@latest -w . && go run mvdan.cc/gofumpt@latest -w ."
+description = "Format code with goimports and gofumpt"
+
+[tasks.release_gh]
+run = "GITHUB_TOKEN=$(gh auth token) go run github.com/goreleaser/goreleaser/v2@latest release --clean"
+description = "Create GitHub release with GoReleaser"
+
+[tasks.release]
+run = "go run github.com/goreleaser/goreleaser/v2@latest release --snapshot --clean"
+description = "Local snapshot release into dist/"
