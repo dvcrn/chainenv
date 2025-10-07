@@ -1,6 +1,6 @@
 # chainenv CLI
 
-A simple macOS Keychain CLI wrapper for getting/setting secrets from keychain or 1Password, and using them as environment variables.
+A simple macOS Keychain and Linux Secret Service wrapper for getting/setting secrets from keychain or 1Password, and using them as environment variables.
 
 ## Installation
 
@@ -38,6 +38,7 @@ Available Commands:
   ls          List all stored accounts
   set         Set a password for an account
   update      Update a password for an existing account
+  diag        Diagnose available backends
 
 Flags:
       --backend string   Backend to use (keychain or 1password) (default "keychain")
@@ -226,6 +227,31 @@ This tool uses the macOS Keychain for secure password storage. Passwords are sto
 - Account name: `<account>`
 
 
+### Linux Keychain Support
+
+On Linux, the `keychain` backend uses the Secret Service API via the system keyring (e.g., GNOME Keyring or KWallet). A running Secret Service provider is required (typically present on desktop distributions). On minimal/server installs you may need to install and start a keyring daemon.
+
+- GNOME-based distros: GNOME Keyring usually preinstalled; `secret-tool` available via `libsecret-tools`.
+- KDE Plasma: KWallet is typically installed; enable Secret Service integration in system settings.
+- If no provider is available, commands using the `keychain` backend will return an error indicating how to enable one.
+
+Stored items are grouped under the service `chainenv` with each account stored under its own key (the account name).
+
 ### 1Password
 
 When using the 1Password backend, the `1password` CLI is used to retrieve the password. Secrets are stored in the *chainenv* vault by default.
+#### Diagnose Backends
+Checks which backends are available on the current system.
+
+```
+chainenv diag
+```
+
+Sample output:
+
+```
+Backend diagnostics:
+- macOS Keychain: available
+- Linux Keyring (Secret Service/KWallet): unavailable (not Linux)
+- 1Password CLI: available (signed in)
+```

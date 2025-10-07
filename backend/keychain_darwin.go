@@ -1,6 +1,9 @@
+//go:build darwin
+
 package backend
 
 import (
+	"bufio"
 	"fmt"
 	"os/exec"
 	"regexp"
@@ -9,8 +12,8 @@ import (
 
 type KeychainBackend struct{}
 
-func NewKeychainBackend() *KeychainBackend {
-	return &KeychainBackend{}
+func NewKeychainBackend() (Backend, error) {
+	return &KeychainBackend{}, nil
 }
 
 func (k *KeychainBackend) GetPassword(account string) (string, error) {
@@ -35,24 +38,25 @@ func (k *KeychainBackend) SetPassword(account, password string, update bool) err
 	return nil
 }
 
+var keychainServiceRegex = regexp.MustCompile(`"svce"<blob>="chainenv-(.+)"`)
+
 func (k *KeychainBackend) List() ([]string, error) {
-	// Use security dump-keychain to get all keychain items
 	cmd := exec.Command("security", "dump-keychain")
-	output, err := cmd.CombinedOutput()
+
+	stdout, err := cmd.StdoutPipe()
 	if err != nil {
-		return nil, fmt.Errorf("error listing keychain items: %v", err)
+		return nil, fmt.Errorf("error creating stdout pipe for security command: %w", err)
+	}
+	if err := cmd.Start(); err != nil {
+		return nil, fmt.Errorf("error starting security command: %w", err)
 	}
 
-	// Parse the output to find chainenv items
 	var accounts []string
 	seen := make(map[string]bool)
-	
-	// Look for service attributes that match "chainenv-*"
-	lines := strings.Split(string(output), "\n")
-	serviceRegex := regexp.MustCompile(`"svce"<blob>="chainenv-(.+)"`)
-	
-	for _, line := range lines {
-		matches := serviceRegex.FindStringSubmatch(line)
+	scanner := bufio.NewScanner(stdout)
+
+	for scanner.Scan() {
+		matches := keychainServiceRegex.FindStringSubmatch(scanner.Text())
 		if len(matches) > 1 {
 			account := matches[1]
 			if !seen[account] {
@@ -61,6 +65,12 @@ func (k *KeychainBackend) List() ([]string, error) {
 			}
 		}
 	}
-	
+	if err := scanner.Err(); err != nil {
+		return nil, fmt.Errorf("error reading security command output: %w", err)
+	}
+	if err := cmd.Wait(); err != nil {
+		return nil, fmt.Errorf("error listing keychain items: %v", err)
+	}
+
 	return accounts, nil
 }

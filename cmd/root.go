@@ -41,7 +41,11 @@ func getBackendWithType(backendType string) (backend.Backend, error) {
 
 	switch backendType {
 	case "keychain":
-		return backend.NewKeychainBackend(), nil
+		b, err := backend.NewKeychainBackend()
+		if err != nil {
+			return nil, fmt.Errorf("keychain backend unavailable: %w", err)
+		}
+		return b, nil
 	case "1password":
 		return backend.NewOnePasswordBackend(opVault, opts), nil
 	default:
