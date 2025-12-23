@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/dvcrn/chainenv/config"
 	"github.com/spf13/cobra"
 )
 
@@ -25,6 +26,38 @@ var setCmd = &cobra.Command{
 
 		if err := b.SetPassword(account, password, false); err != nil {
 			log.Err("Failed to set password: %v", err)
+			os.Exit(1)
+		}
+
+		cwd, err := os.Getwd()
+		if err != nil {
+			log.Err("Failed to determine current directory: %v", err)
+			os.Exit(1)
+		}
+
+		configPath, ok, err := config.FindConfig(cwd)
+		if err != nil {
+			log.Err("Failed to locate config file: %v", err)
+			os.Exit(1)
+		}
+		if !ok {
+			configPath = config.DefaultConfigPath(cwd)
+		}
+
+		cfg, err := config.LoadOrEmpty(configPath)
+		if err != nil {
+			log.Err("Failed to read config: %v", err)
+			os.Exit(1)
+		}
+
+		entry := config.KeyEntry{Name: account, Provider: backendType}
+		if existing, ok := cfg.FindKey(account); ok {
+			entry.Default = existing.Default
+		}
+		cfg.UpsertKey(entry)
+
+		if err := config.Save(configPath, cfg); err != nil {
+			log.Err("Failed to write config: %v", err)
 			os.Exit(1)
 		}
 

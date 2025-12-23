@@ -44,6 +44,11 @@ func FindConfig(startDir string) (string, bool, error) {
 	return "", false, nil
 }
 
+// DefaultConfigPath returns the default config filename for a directory.
+func DefaultConfigPath(dir string) string {
+	return filepath.Join(dir, DotConfigName)
+}
+
 func isFile(path string) (bool, error) {
 	info, err := os.Stat(path)
 	if err != nil {
