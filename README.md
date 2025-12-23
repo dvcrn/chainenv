@@ -41,9 +41,11 @@ Usage:
 Available Commands:
   completion  Generate the autocompletion script for the specified shell
   copy        Copy passwords between backends
+  generate-env Generate a .envrc file from config
   get         Get a password for an account
   get-env     Get passwords as environment variables
   help        Help about any command
+  list        List keys declared in config
   ls          List all stored accounts
   set         Set a password for an account
   update      Update a password for an existing account
@@ -91,8 +93,15 @@ Lists all accounts that have passwords stored in the configured backend.
 
 ```
 chainenv ls
-chainenv list
 chainenv ls --backend 1password
+```
+
+#### List Config Keys
+
+Lists keys declared in `.chainenv.toml` or `chainenv.toml`.
+
+```
+chainenv list
 ```
 
 #### Get Password
@@ -107,10 +116,12 @@ chainenv get <account> --backend 1password
 #### Set Password
 
 Stores a new password in the keychain for a specified account.
+Also registers the key in `.chainenv.toml` (or `chainenv.toml` if found).
 
 ```
 chainenv set <account> <password>
 chainenv set <account> <password> --backend 1password
+chainenv set <account> <password> --default <value>
 ```
 
 #### Update Password
@@ -151,12 +162,58 @@ export account2='bar'
 chainenv cp --from <backend> --to <backend> ITEM1,ITEM2
 ```
 
+### Generate .envrc
+
+Generates a `.envrc` file from the keys declared in config.
+
+```
+chainenv generate-env
+chainenv generate-env --stdout
+chainenv generate-env --force
+```
+
+## Project Config
+
+If `.chainenv.toml` or `chainenv.toml` exists, `chainenv` will read it and use it to:
+- List configured keys (`chainenv list`)
+- Provide default fallbacks when a secret is missing
+- Generate `.envrc` (`chainenv generate-env`)
+
+Lookup order:
+1. `.chainenv.toml`
+2. `chainenv.toml`
+
+Example config:
+
+```
+[[keys]]
+name = "GITHUB_TOKEN"
+provider = "keychain"
+default = ""
+
+[[keys]]
+name = "SOME_FLAG"
+provider = "keychain"
+default = "true"
+```
+
+Notes:
+- `default` values are stored in plaintext.
+- `provider` can be `keychain` or `1password`.
+- If a key has a `default` and the secret is missing, `chainenv get` and `chainenv get-env` will use the default.
+
 ## Examples
 
 ### List all stored accounts
 
 ```
 chainenv ls
+```
+
+### List configured keys
+
+```
+chainenv list
 ```
 
 ### Get a password
@@ -181,6 +238,12 @@ chainenv update myaccount newpassword123
 
 ```
 chainenv get-env GITHUB_USERNAME,GITHUB_PASSWORD,AWS_KEY
+```
+
+### Generate a .envrc
+
+```
+chainenv generate-env
 ```
 
 ## Usage in Shell Environments
@@ -216,6 +279,12 @@ eval (chainenv get-env GITHUB_USERNAME,GITHUB_PASSWORD --fish)
 ```
 
 ### Direnv (.envrc)
+
+Generate a `.envrc` from config:
+
+```
+chainenv generate-env
+```
 
 #### Individual password retrieval
 
