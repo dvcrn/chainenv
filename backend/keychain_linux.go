@@ -33,7 +33,7 @@ func (k *KeychainBackend) GetPassword(account string) (string, error) {
 	item, err := k.ring.Get(account)
 	if err != nil {
 		if errors.Is(err, keyring.ErrKeyNotFound) {
-			return "", fmt.Errorf("the item '%s' does not exist in the keyring", account)
+			return "", fmt.Errorf("%w: the item '%s' does not exist in the keyring", ErrNotFound, account)
 		}
 		return "", fmt.Errorf("error retrieving password: %w", err)
 	}

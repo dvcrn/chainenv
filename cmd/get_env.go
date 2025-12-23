@@ -1,10 +1,12 @@
 package cmd
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"strings"
 
+	"github.com/dvcrn/chainenv/backend"
 	"github.com/spf13/cobra"
 )
 
@@ -57,17 +59,57 @@ Multiple accounts should be provided as a comma-separated list, e.g.:
 
 		log.Debug("Getting passwords for accounts: %s, shell=%s", strings.Join(accounts, ", "), shellType)
 
-		b, err := getBackendWithType(backendType)
+		cfg, err := loadConfig()
 		if err != nil {
-			log.Err("Error initializing backend: %v", err)
+			log.Err("Error loading config: %v", err)
 			os.Exit(1)
 		}
 
-		passwords, err := b.GetMultiplePasswords(accounts)
+		backends := make(map[string]backend.Backend)
+		getBackend := func(provider string) (backend.Backend, error) {
+			if cached, ok := backends[provider]; ok {
+				return cached, nil
+			}
+			b, err := getBackendWithType(provider)
+			if err != nil {
+				return nil, err
+			}
+			backends[provider] = b
+			return b, nil
+		}
+
+		passwords := make(map[string]string)
+		var firstErr error
+		for _, account := range accounts {
+			provider, defaultValue := resolveKeyConfig(cfg, account, backendType)
+			b, err := getBackend(provider)
+			if err != nil {
+				if firstErr == nil {
+					firstErr = err
+				}
+				continue
+			}
+
+			password, err := b.GetPassword(account)
+			if err != nil {
+				if errors.Is(err, backend.ErrNotFound) && defaultValue != nil {
+					passwords[account] = *defaultValue
+					continue
+				}
+				if firstErr == nil {
+					firstErr = err
+				}
+				continue
+			}
+			passwords[account] = password
+		}
+
 		output := formatShellExports(passwords, shellType)
 		if output == "" {
 			fmt.Fprintln(os.Stderr, "No passwords found")
-			fmt.Fprintln(os.Stderr, err.Error())
+			if firstErr != nil {
+				fmt.Fprintln(os.Stderr, firstErr.Error())
+			}
 			os.Exit(1)
 		}
 		fmt.Println(output)

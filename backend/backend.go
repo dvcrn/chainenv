@@ -1,8 +1,12 @@
 package backend
 
 import (
+	"errors"
+
 	"github.com/dvcrn/chainenv/logger"
 )
+
+var ErrNotFound = errors.New("secret not found")
 
 // Backend defines the interface for password storage backends
 type Backend interface {

@@ -8,6 +8,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var setDefault string
+
 var setCmd = &cobra.Command{
 	Use:   "set [account] [password]",
 	Short: "Set a password for an account",
@@ -54,6 +56,9 @@ var setCmd = &cobra.Command{
 		if existing, ok := cfg.FindKey(account); ok {
 			entry.Default = existing.Default
 		}
+		if cmd.Flags().Changed("default") {
+			entry.Default = &setDefault
+		}
 		cfg.UpsertKey(entry)
 
 		if err := config.Save(configPath, cfg); err != nil {
@@ -91,6 +96,7 @@ var updateCmd = &cobra.Command{
 }
 
 func init() {
+	setCmd.Flags().StringVar(&setDefault, "default", "", "Default value to store in config if secret is missing")
 	rootCmd.AddCommand(setCmd)
 	rootCmd.AddCommand(updateCmd)
 }

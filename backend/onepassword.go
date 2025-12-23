@@ -72,7 +72,7 @@ func (o *OnePasswordBackend) GetPassword(account string) (string, error) {
 	value, err := o.client.ReadItemField(o.vault.ID, account, "password")
 	if err != nil {
 		if strings.Contains(err.Error(), "isn't an item") {
-			return "", fmt.Errorf("the item '%s' does not exist in the vault", account)
+			return "", fmt.Errorf("%w: the item '%s' does not exist in the vault", ErrNotFound, account)
 		}
 
 		return "", fmt.Errorf("error retrieving password from 1Password: %v", err)

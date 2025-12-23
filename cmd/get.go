@@ -1,9 +1,11 @@
 package cmd
 
 import (
+	"errors"
 	"fmt"
 	"os"
 
+	"github.com/dvcrn/chainenv/backend"
 	"github.com/spf13/cobra"
 )
 
@@ -16,7 +18,14 @@ var getCmd = &cobra.Command{
 		account := args[0]
 		log.Debug("Getting password for account: %s", account)
 
-		b, err := getBackendWithType(backendType)
+		cfg, err := loadConfig()
+		if err != nil {
+			log.Err("Error loading config: %v", err)
+			os.Exit(1)
+		}
+
+		provider, defaultValue := resolveKeyConfig(cfg, account, backendType)
+		b, err := getBackendWithType(provider)
 		if err != nil {
 			log.Err("Error initializing backend: %v", err)
 			os.Exit(1)
@@ -24,6 +33,10 @@ var getCmd = &cobra.Command{
 
 		password, err := b.GetPassword(account)
 		if err != nil {
+			if errors.Is(err, backend.ErrNotFound) && defaultValue != nil {
+				fmt.Println(*defaultValue)
+				return
+			}
 			log.Err("Error retrieving password: %v", err)
 			os.Exit(1)
 		}
