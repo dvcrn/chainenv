@@ -44,9 +44,12 @@ var getEnvCmd = &cobra.Command{
 	Long: `Retrieve passwords for multiple accounts and format them as environment variables.
 Multiple accounts should be provided as a comma-separated list, e.g.:
   chainenv get-env AWS_KEY,AWS_SECRET --shell fish`,
-	Args: cobra.ExactArgs(1),
+	Args: cobra.MaximumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		accounts := strings.Split(args[0], ",")
+		var accounts []string
+		if len(args) > 0 {
+			accounts = strings.Split(args[0], ",")
+		}
 		// Handle legacy shell flags
 		switch {
 		case fishFlag:
@@ -57,13 +60,30 @@ Multiple accounts should be provided as a comma-separated list, e.g.:
 			shellType = "zsh"
 		}
 
-		log.Debug("Getting passwords for accounts: %s, shell=%s", strings.Join(accounts, ", "), shellType)
-
 		cfg, err := loadConfig()
 		if err != nil {
 			log.Err("Error loading config: %v", err)
 			os.Exit(1)
 		}
+
+		if len(accounts) == 0 {
+			if cfg == nil {
+				fmt.Fprintln(os.Stderr, "No config found")
+				os.Exit(1)
+			}
+			for _, entry := range cfg.Keys {
+				if entry.Name == "" {
+					continue
+				}
+				accounts = append(accounts, entry.Name)
+			}
+			if len(accounts) == 0 {
+				fmt.Fprintln(os.Stderr, "No keys found")
+				return
+			}
+		}
+
+		log.Debug("Getting passwords for accounts: %s, shell=%s", strings.Join(accounts, ", "), shellType)
 
 		backends := make(map[string]backend.Backend)
 		getBackend := func(provider string) (backend.Backend, error) {

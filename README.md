@@ -41,7 +41,6 @@ Usage:
 Available Commands:
   completion  Generate the autocompletion script for the specified shell
   copy        Copy passwords between backends
-  generate-env Generate environment exports from config
   get         Get a password for an account
   get-env     Get passwords as environment variables
   help        Help about any command
@@ -156,19 +155,12 @@ export account1='foo'
 export account2='bar'
 ```
 
+If no accounts are provided, `chainenv get-env` will load keys from `.chainenv.toml` or `chainenv.toml`.
+
 ### Copy Passwords
 
 ```
 chainenv cp --from <backend> --to <backend> ITEM1,ITEM2
-```
-
-### Generate Environment Exports
-
-Outputs shell exports for all keys declared in config.
-
-```
-chainenv generate-env
-chainenv generate-env --shell fish
 ```
 
 ## Project Config
@@ -176,7 +168,7 @@ chainenv generate-env --shell fish
 If `.chainenv.toml` or `chainenv.toml` exists, `chainenv` will read it and use it to:
 - List configured keys (`chainenv list`)
 - Provide default fallbacks when a secret is missing
-- Generate shell exports (`chainenv generate-env`)
+- Generate shell exports (`chainenv get-env` without args)
 
 Lookup order:
 1. `.chainenv.toml`
@@ -239,10 +231,10 @@ chainenv update myaccount newpassword123
 chainenv get-env GITHUB_USERNAME,GITHUB_PASSWORD,AWS_KEY
 ```
 
-### Generate environment exports
+### Generate environment exports from config
 
 ```
-chainenv generate-env
+chainenv get-env
 ```
 
 ## Usage in Shell Environments
@@ -282,7 +274,7 @@ eval (chainenv get-env GITHUB_USERNAME,GITHUB_PASSWORD --fish)
 Generate exports from config (write to `.envrc`):
 
 ```
-chainenv generate-env > .envrc
+chainenv get-env > .envrc
 ```
 
 #### Individual password retrieval
