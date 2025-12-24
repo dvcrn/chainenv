@@ -9,10 +9,9 @@ import (
 )
 
 var lsCmd = &cobra.Command{
-	Use:     "ls",
-	Aliases: []string{"list"},
-	Short:   "List all stored accounts",
-	Long:    `List all accounts that have passwords stored in the configured backend.`,
+	Use:   "ls",
+	Short: "List all stored accounts",
+	Long:  `List all accounts that have passwords stored in the configured backend.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		log.Debug("Listing all accounts")
 

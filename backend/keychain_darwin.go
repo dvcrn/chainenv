@@ -21,7 +21,11 @@ func (k *KeychainBackend) GetPassword(account string) (string, error) {
 	cmd := exec.Command("security", "find-generic-password", "-a", account, "-s", fmt.Sprintf("chainenv-%s", account), "-w")
 	output, err := cmd.CombinedOutput()
 	if err != nil {
-		return "", fmt.Errorf("error retrieving password: %v", err)
+		out := strings.TrimSpace(string(output))
+		if strings.Contains(out, "could not be found") {
+			return "", fmt.Errorf("%w: %s", ErrNotFound, out)
+		}
+		return "", fmt.Errorf("error retrieving password: %v: %s", err, out)
 	}
 	return strings.TrimSpace(string(output)), nil
 }
