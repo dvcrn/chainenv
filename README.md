@@ -271,10 +271,10 @@ eval (chainenv get-env GITHUB_USERNAME,GITHUB_PASSWORD --fish)
 
 ### Direnv (.envrc)
 
-Generate exports from config (write to `.envrc`):
+Put this in your `.envrc` to export keys from config:
 
 ```
-chainenv get-env > .envrc
+eval "$(chainenv get-env --shell bash)"
 ```
 
 #### Individual password retrieval
