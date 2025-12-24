@@ -10,13 +10,18 @@ import (
 )
 
 type Config struct {
-	Keys []KeyEntry `toml:"keys"`
+	Keys        []KeyEntry         `toml:"keys"`
+	OnePassword *OnePasswordConfig `toml:"1password,omitempty"`
 }
 
 type KeyEntry struct {
 	Name     string  `toml:"name"`
 	Provider string  `toml:"provider,omitempty"`
 	Default  *string `toml:"default,omitempty"`
+}
+
+type OnePasswordConfig struct {
+	ServiceAccountTokenKey string `toml:"service_account_token_key,omitempty"`
 }
 
 func Load(path string) (*Config, error) {

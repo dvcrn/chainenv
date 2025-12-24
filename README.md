@@ -177,6 +177,9 @@ Lookup order:
 Example config:
 
 ```
+["1password"]
+service_account_token_key = "CHAINENV_OP_TOKEN"
+
 [[keys]]
 name = "GITHUB_TOKEN"
 provider = "keychain"
@@ -191,6 +194,7 @@ default = "true"
 Notes:
 - `default` values are stored in plaintext.
 - `provider` can be `keychain` or `1password`.
+- `["1password"].service_account_token_key` points to a keychain item that holds the 1Password service account token.
 - If a key has a `default` and the secret is missing, `chainenv get` and `chainenv get-env` will use the default.
 
 ## Examples

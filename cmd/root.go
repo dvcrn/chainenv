@@ -47,6 +47,13 @@ func getBackendWithType(backendType string) (backend.Backend, error) {
 		}
 		return b, nil
 	case "1password":
+		cfg, err := loadConfig()
+		if err != nil {
+			return nil, fmt.Errorf("error loading config: %w", err)
+		}
+		if err := ensureOpServiceAccountToken(cfg); err != nil {
+			return nil, err
+		}
 		return backend.NewOnePasswordBackend(opVault, opts), nil
 	default:
 		return nil, fmt.Errorf("unknown backend: %s", backendType)

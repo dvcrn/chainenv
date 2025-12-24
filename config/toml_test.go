@@ -82,3 +82,22 @@ func TestLoadEmptyFile(t *testing.T) {
 		t.Fatalf("expected empty config, got %#v", cfg)
 	}
 }
+
+func TestLoadOnePasswordConfig(t *testing.T) {
+	t.Parallel()
+
+	data := []byte(`
+["1password"]
+service_account_token_key = "CHAINENV_OP_TOKEN"
+`)
+	cfg, err := parseConfig(data)
+	if err != nil {
+		t.Fatalf("parse: %v", err)
+	}
+	if cfg.OnePassword == nil {
+		t.Fatalf("expected 1password config to be present")
+	}
+	if cfg.OnePassword.ServiceAccountTokenKey != "CHAINENV_OP_TOKEN" {
+		t.Fatalf("unexpected token key: %s", cfg.OnePassword.ServiceAccountTokenKey)
+	}
+}
