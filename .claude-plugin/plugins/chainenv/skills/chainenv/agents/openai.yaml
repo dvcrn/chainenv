@@ -1,0 +1,4 @@
+interface:
+  display_name: "Chainenv"
+  short_description: "Use chainenv for local secret workflows"
+  default_prompt: "Use $chainenv to inspect backends, resolve config-driven secrets, and generate shell exports safely."

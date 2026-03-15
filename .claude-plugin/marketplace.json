@@ -1,0 +1,20 @@
+{
+  "name": "dvcrn-chainenv",
+  "owner": {
+    "name": "David Mohl",
+    "email": "git@d.sh",
+    "url": "https://github.com/dvcrn"
+  },
+  "metadata": {
+    "pluginRoot": "./.claude-plugin/plugins",
+    "description": "Install the chainenv Claude plugin to teach agents how to use the chainenv CLI for local secret workflows."
+  },
+  "plugins": [
+    {
+      "name": "chainenv",
+      "source": "./.claude-plugin/plugins/chainenv",
+      "version": "1.4.0",
+      "description": "Use the chainenv CLI for config-aware secret retrieval, backend diagnostics, and shell export generation."
+    }
+  ]
+}

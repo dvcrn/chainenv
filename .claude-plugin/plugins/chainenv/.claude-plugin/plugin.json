@@ -1,0 +1,11 @@
+{
+  "name": "chainenv",
+  "version": "1.4.0",
+  "description": "Claude plugin for chainenv, the CLI for config-aware local secret workflows across keychain and 1Password.",
+  "author": {
+    "name": "David Mohl",
+    "email": "git@d.sh",
+    "url": "https://github.com/dvcrn"
+  },
+  "homepage": "https://github.com/dvcrn/chainenv"
+}

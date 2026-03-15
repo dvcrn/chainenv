@@ -32,6 +32,33 @@ To use 1Password functionality, you need to have the 1Password CLI installed as 
 brew install 1password-cli
 ```
 
+## Agent Installation
+
+`npx skills`
+
+```bash
+npx skills add dvcrn/chainenv --full-depth --list
+npx skills add dvcrn/chainenv --full-depth
+```
+
+Claude marketplace CLI
+
+```bash
+claude plugin marketplace add dvcrn/chainenv
+claude plugin install chainenv@dvcrn-chainenv --scope user
+```
+
+If the marketplace was already added, update it before reinstalling:
+
+```bash
+claude plugin marketplace update dvcrn-chainenv
+claude plugin install chainenv@dvcrn-chainenv --scope user
+```
+
+Claude UI
+
+Open Claude's plugin or marketplace UI, add or select the `dvcrn/chainenv` marketplace, then install the `chainenv` plugin. The bundled `chainenv` skill will be available after installation.
+
 ## Usage
 
 ```
